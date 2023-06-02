@@ -4,6 +4,7 @@ import RecordRTC from 'recordrtc';
 import axios from 'axios';
 
 import './App.css';
+// const baseUrl = "https://eager-plum-bracelet.cyclic.app"
 
 function App() {
   const [recordings, setRecordings] = useState([]);
@@ -58,19 +59,17 @@ function App() {
     }
   };
   const onSave = async () => {
+
     try {
       const formData = new FormData();
       chunksRef.current.forEach((chunk, index) => {
         formData.append('recording', chunk, `recording${index}.webm`);
       });
 
-      const response = await fetch('http://localhost:5000/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await axios.post('https://eager-plum-bracelet.cyclic.app/api/upload', formData);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         setRecordings(prevRecordings => [...prevRecordings, data]);
         chunksRef.current = [];
         fetchRecordings();
@@ -85,7 +84,7 @@ function App() {
 
   const fetchRecordings = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/recordings');
+      const response = await fetch(`https://eager-plum-bracelet.cyclic.app/api/recordings`);
       if (response.ok) {
         const data = await response.json();
         setRecordings(data);
@@ -106,7 +105,7 @@ function App() {
       <ul>
         {recordings.map((recording, index) => (
           <li key={index} >
-            <audio controls src={`http://localhost:5000/${recording?.path}`} />
+            <audio controls src={`https://eager-plum-bracelet.cyclic.app/${recording?.path}`} />
             <button className='button' onClick={() => handleDelete(recording?._id)}>Delete</button>
           </li>
         ))}
@@ -118,7 +117,7 @@ function App() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/delete/${id}`);
+      await axios.delete(`https://eager-plum-bracelet.cyclic.app/api/delete/${id}`);
       fetchRecordings();
     } catch (error) {
       console.error('Failed to delete the recording:', error);
